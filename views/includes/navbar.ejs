@@ -1,4 +1,4 @@
-<style>
+<!-- <style>
     .search-btn{
       background-color: #fe424d;
       color: #fff;
@@ -59,4 +59,140 @@
       </div>
     </div>
   </div>
+</nav> -->
+
+
+
+
+
+
+
+<style>
+    .search-btn{
+      background-color: #fe424d;
+      color: #fff;
+      border-radius: 25px;
+      padding: 0 1rem 0 1rem;
+    }
+    .search-btn:hover{
+      background-color: #fe424d;
+      color: #fff;
+    }
+    .search-btn i {
+      display: inline;
+      margin: 0.5rem;
+    }
+
+    .search-inp{
+      border-radius: 25px;
+      padding: 0.5rem 3rem;
+      font-size: 0.8rem;
+    }
+</style>
+
+<nav class="navbar navbar-expand-md bg-body-light border-bottom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/listings">
+      <i class="fa-regular fa-compass"></i>
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      
+      <div class="navbar-nav">
+        <a class="nav-link" href="/listings">Explore</a>
+      </div>
+
+      <!-- ⭐ AI SEARCH BAR (REPLACES YOUR OLD ONE) -->
+      <div class="navbar-nav ms-auto">
+        <form class="d-flex" id="navbarAiSearch">
+          <input 
+            id="navbarAiQuery"
+            class="form-control me-2 search-inp" 
+            type="search" 
+            placeholder="Search anything... e.g., Goa hotels under 1500"
+          />
+          <button class="btn search-btn" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i> Search
+          </button>
+        </form>
+      </div>
+
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/listings/new">Airbnb your home</a>
+
+        <% if(!currUser){ %>
+          <a class="nav-link" href="/signup"><b>SignUp</b></a>
+          <a class="nav-link" href="/login"><b>Log in</b></a>
+        <% } %>
+
+        <% if(currUser){ %>
+          <a class="nav-link" href="/logout"><b>Log out</b></a>
+        <% } %>
+
+      </div>
+
+    </div>
+  </div>
 </nav>
+
+<!-- ⭐ AI SEARCH SCRIPT -->
+<script>
+document.getElementById("navbarAiSearch").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const query = document.getElementById("navbarAiQuery").value.trim();
+    if (!query) return;
+
+    const res = await fetch(`/listings/ai/search?query=` + query);
+    const data = await res.json();
+
+    const container = document.getElementById("listingContainer");
+
+    if (!container) {
+        console.error("listingContainer not found. Make sure you added the ID in index.ejs.");
+        return;
+    }
+
+    container.innerHTML = ""; // Clear previous results
+
+    if (data.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center mt-4">
+              <h4>No results found</h4>
+          </div>`;
+        return;
+    }
+
+    data.forEach(listing => {
+        container.innerHTML += `
+          <a href="/listings/${listing._id}" class="listing-link">
+            <div class="card col listing-card">
+
+              <img 
+                src="${listing.image?.url || 'https://via.placeholder.com/600'}" 
+                class="card-img-top" 
+                style="height: 20rem"
+              />
+
+              <div class="card-body">
+                <p class="card-text">
+                  <b>${listing.title}</b><br/>
+                  ₹ ${Number(listing.price).toLocaleString("en-IN")}/night
+                </p>
+              </div>
+
+            </div>
+          </a>
+        `;
+    });
+});
+</script>
